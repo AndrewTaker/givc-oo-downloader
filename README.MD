@@ -14,3 +14,8 @@ make
 -l: логин от личного кабинета
 -p: пароль от личного кабинета
 ```
+
+## Узнать доступные для скачивания годы
+```shell
+./bin/miccedu-downloader_os_arch -l login -p password -ro true
+```

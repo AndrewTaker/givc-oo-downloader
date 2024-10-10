@@ -1,4 +1,4 @@
-module web-traffic
+module miccedu-downloader
 
 go 1.23
 
