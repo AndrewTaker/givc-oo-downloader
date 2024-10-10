@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
-	"path"
 	"strings"
 	"sync"
 
@@ -126,14 +125,6 @@ func (c *Cabinet) extractUploadHref(doc *goquery.Document) string {
 	return doc.Find(`a[href^="/excel/"]`).AttrOr("href", "")
 }
 
-func (c *Cabinet) createFileName(s string) string {
-	ext := path.Ext(s)
-	args := strings.Split(s, "/")
-	org := strings.ReplaceAll(args[8], c.ReportName, "")
-	org = strings.ReplaceAll(org, ext, "")
-	return fmt.Sprintf("%s%s%s", args[7], org, ext)
-}
-
 func (c *Cabinet) parseURL(jumperVal string) string {
 	v := parseArgs(jumperVal)
 
@@ -154,4 +145,23 @@ func (c *Cabinet) parseURL(jumperVal string) string {
 	u.RawQuery = q.Encode()
 
 	return u.String()
+}
+
+func (c *Cabinet) GetAvailableReports() error {
+	resp, err := c.LoadReportPage()
+	if err != nil {
+		return fmt.Errorf("cabinet.GetAvailableReports: err %s", err)
+	}
+	defer resp.Body.Close()
+
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	if err != nil {
+		return fmt.Errorf("cabinet.GetAvailableReports: failed to parse document: %s", err)
+	}
+
+	doc.Find(`ul[class="dropdown-menu"]`).Children().Each(func(i int, s *goquery.Selection) {
+		log.Println(s.Text())
+	})
+
+	return nil
 }

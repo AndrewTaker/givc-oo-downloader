@@ -15,6 +15,7 @@ import (
 )
 
 var (
+	reportsOnly                   bool
 	report, year, login, password string
 	cabinet                       *Cabinet
 )
@@ -24,11 +25,29 @@ func main() {
 	flag.StringVar(&year, "y", "", "report year 2016-2024")
 	flag.StringVar(&login, "l", "", "miccedu login")
 	flag.StringVar(&password, "p", "", "miccedu password")
+	flag.BoolVar(&reportsOnly, "ro", false, "get only available reports")
 	flag.Parse()
 
-	if len(os.Args[1:]) != 8 { // mandatory args are 4
-		flag.PrintDefaults()
-		log.Fatalf("must provide all args")
+	cabinet = NewCabinet(map[string]string{
+		"ologin":    login,
+		"opassword": password,
+		"source":    "direct",
+		"ltype":     "default",
+		"ocel":      "2",
+		"ocf":       report,
+		"ocy":       year,
+	})
+
+	if reportsOnly {
+		cabinet = NewCabinet(map[string]string{
+			"ologin":    login,
+			"opassword": password,
+			"source":    "direct",
+			"ltype":     "default",
+			"ocel":      "2",
+		})
+		cabinet.GetAvailableReports()
+		return
 	}
 
 	cabinet = NewCabinet(map[string]string{
